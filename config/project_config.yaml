@@ -1,0 +1,18 @@
+data:
+  external_dir: data/external
+  processed_dir: data/processed
+  diabetes_zip_url: https://archive.ics.uci.edu/static/public/296/diabetes+130-us+hospitals+for+years+1999-2008.zip
+  diabetes_csv_name: diabetic_data.csv
+  hk_stats_file: config/hk_health_stats.csv
+
+model:
+  target_column: readmitted_30d
+  random_state: 42
+  test_size: 0.2
+  calibration_target_rate: 0.17
+  positive_threshold: 0.30
+
+app:
+  database_path: artifacts/patients.db
+  model_path: artifacts/best_model.joblib
+  metadata_path: artifacts/model_metadata.yaml

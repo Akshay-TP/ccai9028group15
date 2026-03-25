@@ -1,0 +1,5 @@
+metric,year,value,source
+chronic_disease_prevalence_percent,2022,38.0,Hong Kong Department of Health Population Health Survey 2020-22 (summary)
+public_hospital_admissions_million,2023,1.8,Hospital Authority Statistical Report (public hospital inpatient discharges and deaths proxy)
+assumed_30d_readmission_rate,2024,17.0,Project calibration assumption based on international chronic-disease cohorts
+telehealth_target_followup_within_7d_percent,2024,80.0,Prototype service design target for high-risk cohort
