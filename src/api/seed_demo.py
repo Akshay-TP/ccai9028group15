@@ -11,16 +11,7 @@ if __package__ in (None, ""):
 from src.api.registry import upsert_patient
 from src.utils import load_config
 
-"""
-Seed script for quick dashboard demo.
-
-What this file does:
-1. Inserts three example patient profiles into local SQLite.
-
-Possible improvements:
-1. Move sample patients to CSV/JSON so non-coders can edit them.
-2. Add CLI options for number of synthetic records to generate.
-"""
+"""Seed script that inserts a few demo patients into the local registry."""
 
 
 def seed_patients(db_path: str) -> None:

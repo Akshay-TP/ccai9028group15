@@ -15,19 +15,7 @@ if __package__ in (None, ""):
 
 from src.utils import load_config
 
-"""
-Step 1: Download external datasets and keep a local HK stats snapshot.
-
-What this file does:
-1. Downloads the UCI diabetes hospital dataset zip from the internet.
-2. Extracts the CSV and stores it in data/external.
-3. Copies Hong Kong calibration statistics into data/external for run traceability.
-
-Possible improvements:
-1. Add retry logic for unstable internet connections.
-2. Add checksum/hash validation for downloaded files.
-3. Save download metadata (timestamp, source URL, file size) for reproducibility.
-"""
+"""Step 1 of the pipeline: download source files into data/external."""
 
 
 def download_diabetes_dataset(output_dir: Path, zip_url: str) -> Path:

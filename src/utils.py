@@ -5,16 +5,7 @@ from typing import Any
 
 import yaml
 
-"""
-Shared utility helpers used across the project.
-
-What this file does:
-1. Loads the central YAML configuration.
-
-Possible improvements:
-1. Validate required config keys and show clearer errors when keys are missing.
-2. Add environment variable overrides for secrets and deployment settings.
-"""
+"""Project-wide helper utilities."""
 
 
 def load_config(config_path: str = "config/project_config.yaml") -> dict[str, Any]:

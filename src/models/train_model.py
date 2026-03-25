@@ -25,22 +25,7 @@ if __package__ in (None, ""):
 from src.models.calibration import prevalence_shift_calibration
 from src.utils import load_config
 
-"""
-Step 3: Train and compare readmission models.
-
-What this file does:
-1. Loads the processed dataset.
-2. Builds preprocessing (impute + scale + one-hot encode).
-3. Trains three models: Logistic Regression, XGBoost, and MLP.
-4. Selects the best model by ROC-AUC.
-5. Calibrates test probabilities to the Hong Kong target prevalence.
-6. Saves model, metadata, and comparison metrics.
-
-Possible improvements:
-1. Add cross-validation and hyperparameter tuning.
-2. Track experiments with MLflow or Weights & Biases.
-3. Add fairness metrics by subgroup before deployment.
-"""
+"""Step 3 of the pipeline: train candidate models, pick the best, and save artifacts."""
 
 
 NUMERIC_COLUMNS = [

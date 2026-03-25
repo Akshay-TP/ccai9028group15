@@ -10,19 +10,7 @@ import yaml
 
 from src.models.calibration import prevalence_shift_calibration
 
-"""
-Inference layer used by the dashboard.
-
-What this file does:
-1. Loads trained model and metadata.
-2. Scores patient records.
-3. Applies calibration and risk threshold labeling.
-
-Possible improvements:
-1. Add strict schema validation before scoring.
-2. Add batch scoring logs for auditability.
-3. Add confidence intervals or uncertainty estimates.
-"""
+"""Inference wrapper for loading artifacts, scoring patients, and assigning risk labels."""
 
 
 class ReadmissionScorer:

@@ -13,20 +13,7 @@ if __package__ in (None, ""):
 
 from src.utils import load_config
 
-"""
-Step 2: Prepare model-ready dataset from raw EHR-like data.
-
-What this file does:
-1. Cleans raw fields and handles missing markers.
-2. Builds a binary 30-day readmission target.
-3. Engineers simple chronic-condition flags from diagnosis code prefixes.
-4. Selects a compact feature set for beginner-friendly modeling.
-
-Possible improvements:
-1. Add unit tests for feature engineering rules.
-2. Use ICD dictionary mapping instead of prefix-only rules.
-3. Add data quality reports (missingness, outliers, drift checks).
-"""
+"""Step 2 of the pipeline: clean raw data and build the modeling dataset."""
 
 
 def _to_numeric(series: pd.Series) -> pd.Series:

@@ -6,18 +6,7 @@ from typing import Any
 
 import pandas as pd
 
-"""
-Simple SQLite registry for dashboard patient management.
-
-What this file does:
-1. Creates the local patients table if missing.
-2. Supports upsert, delete, and list operations.
-
-Possible improvements:
-1. Replace raw SQL with SQLAlchemy models for maintainability.
-2. Add field-level validation before database writes.
-3. Add created_at/updated_at audit timestamps.
-"""
+"""SQLite registry used by the dashboard for patient CRUD operations."""
 
 PATIENT_COLUMNS = [
     "patient_id",

@@ -2,17 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-"""
-Calibration helper functions.
-
-What this file does:
-1. Provides logit/sigmoid transforms.
-2. Adjusts probabilities to match target prevalence assumptions.
-
-Possible improvements:
-1. Add isotonic and Platt calibration options for comparison.
-2. Validate calibration quality with reliability diagrams.
-"""
+"""Calibration helpers used to shift probabilities to a target prevalence."""
 
 
 def logit(p: np.ndarray) -> np.ndarray:
