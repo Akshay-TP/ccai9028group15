@@ -4,6 +4,8 @@ data:
   diabetes_zip_url: https://archive.ics.uci.edu/static/public/296/diabetes+130-us+hospitals+for+years+1999-2008.zip
   diabetes_csv_name: diabetic_data.csv
   hk_stats_file: config/hk_health_stats.csv
+  download_retries: 3
+  download_timeout_seconds: 60
 
 model:
   target_column: readmitted_30d
@@ -11,6 +13,13 @@ model:
   test_size: 0.2
   calibration_target_rate: 0.17
   positive_threshold: 0.30
+  threshold_strategy: max_f1_subject_to_precision_floor
+  threshold_precision_floor: 0.18
+  threshold_recall_floor: 0.45
+  selection_metric: val_f1_at_opt_threshold
+  max_tuning_rows: 12000
+  include_mlp_candidate: false
+  include_xgboost_candidate: false
 
 app:
   database_path: artifacts/patients.db

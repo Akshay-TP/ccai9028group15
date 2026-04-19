@@ -1,9 +1,32 @@
-best_model: gradient_boosting
+best_model: logistic_regression
 train_prevalence: 0.11160516877118852
 target_prevalence: 0.17
-threshold: 0.3
-calibrated_roc_auc: 0.6827655943252811
-calibrated_pr_auc: 0.23193319293691878
+threshold: 0.17500000000000002
+threshold_strategy: max_f1_subject_to_precision_floor
+requested_threshold_strategy: max_f1_subject_to_precision_floor
+threshold_precision_floor: 0.18
+threshold_recall_floor: 0.45
+validation_precision_at_threshold: 0.180130357495556
+validation_recall_at_threshold: 0.5019262520638414
+validation_f1_at_threshold: 0.2651162790697674
+validation_f2_at_threshold: 0.3697996918335901
+risk_band_thresholds:
+  medium: 0.1
+  high: 0.17500000000000002
+test_metrics:
+  roc_auc: 0.6759899122625348
+  pr_auc: 0.2168307480452531
+  precision: 0.18843025932177382
+  recall: 0.5407309555261999
+  f1: 0.2794720072826582
+  balanced_accuracy: 0.6241231507155968
+test_metrics_base_threshold:
+  roc_auc: 0.6759899122625348
+  pr_auc: 0.2168307480452531
+  precision: 0.2955003357958361
+  recall: 0.19374724790841039
+  f1: 0.23404255319148937
+  balanced_accuracy: 0.5678684810022614
 features:
 - race
 - gender
@@ -19,6 +42,10 @@ features:
 - number_emergency
 - number_inpatient
 - number_diagnoses
+- total_prior_visits
+- inpatient_visit_ratio
+- medications_per_day
+- age_over_65
 - A1Cresult
 - max_glu_serum
 - insulin
@@ -38,6 +65,10 @@ numeric_features:
 - number_emergency
 - number_inpatient
 - number_diagnoses
+- total_prior_visits
+- inpatient_visit_ratio
+- medications_per_day
+- age_over_65
 categorical_features:
 - race
 - gender
@@ -53,3 +84,5 @@ categorical_features:
 - flag_heart_failure
 - flag_kidney_disease
 - flag_copd
+selection_metric: val_f1_at_opt_threshold
+xgboost_available: true

@@ -1,0 +1,6 @@
+source_url: https://archive.ics.uci.edu/static/public/296/diabetes+130-us+hospitals+for+years+1999-2008.zip
+downloaded_at_utc: '2026-04-19T22:03:35.447351+00:00'
+archive_sha256: f82ac129da2ddd2299391ff6fbae3a6a58b3edcf59ac9d7bd480c00fe453112a
+archive_size_bytes: 3170254
+extracted_csv: C:\Users\Akshay T P\Desktop\ccai9028group15\data\external\diabetic_data.csv
+hk_stats_snapshot: C:\Users\Akshay T P\Desktop\ccai9028group15\data\external\hk_stats_snapshot.csv

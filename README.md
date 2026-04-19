@@ -1,8 +1,8 @@
-# Hospital Readmission Prediction for Hong Kong Public Hospitals
+# Hospital Readmission Predictor - Diabetes
 
 ## 1. Project Goal (Simple Version)
 
-This project is an academic prototype that estimates whether a chronic-disease patient may be readmitted within 30 days.
+This project is an academic prototype that estimates whether a diabetes-related patient may be readmitted within 30 days.
 
 The practical goal is to help care teams prioritize follow-up earlier, for example:
 
@@ -15,6 +15,44 @@ This was built from a Year-1 Computer Engineering perspective, so the design cho
 - keep the architecture understandable
 - use a clear script-by-script workflow
 - prioritize reproducible outputs over heavy optimization
+
+## Quickstart (Fastest Way)
+
+Use this if you want to run the project with minimal setup.
+
+1. Create and activate a virtual environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+2. Build artifacts (download, prepare, train)
+
+```powershell
+python -m src.data.download_datasets
+python -m src.data.prepare_dataset
+python -m src.models.train_model
+```
+
+3. Seed sample patients (optional but recommended for first run)
+
+```powershell
+python -m src.api.seed_demo
+```
+
+4. Launch the dashboard
+
+```powershell
+python run_dashboard.py
+```
+
+5. Use the dashboard
+- open the local Streamlit URL shown in terminal (typically http://localhost:8501)
+- go to "Patient Registry" to review seeded records
+- use "Risk Scoring" to run predictions and view LOW/MEDIUM/HIGH triage bands
+- use filters and CSV export for quick cohort review
 
 ## 2. Why This Matters in the Hong Kong Context
 
@@ -32,6 +70,110 @@ Hong Kong Hospital Authority has been pushing digital-health and analytics initi
 - local patient admin panel (add, update, delete)
 - batch scoring and risk visualization
 - intervention suggestions for high-risk patients
+- resilient dataset download with retries and metadata logging
+- automated data-quality report generation during preprocessing
+- richer feature engineering (utilization and acuity features)
+- strict inference schema validation with feature ordering enforcement
+- three-tier risk bands (LOW/MEDIUM/HIGH) for operational triage
+- threshold governance with recall floor and precision-focused selection
+- patient registry audit logging (create/update/delete with actor + timestamp)
+- dashboard cohort filters, CSV export, model card view, audit trail tab, and feature-driver chart
+
+## 3.1 Current Benchmark (Latest Verified Run)
+
+Latest single-run training artifact summary:
+
+- best model: logistic_regression
+- threshold strategy: maximize validation F1 with precision/recall guardrails
+- calibrated deployment threshold: 0.175
+- held-out ROC-AUC: 0.6760
+- held-out PR-AUC: 0.2168
+- held-out recall: 0.5407
+- held-out precision: 0.1884
+- held-out F1: 0.2795
+
+Threshold policy effect vs base threshold 0.30:
+
+- tuned threshold improves precision from 0.1134 to 0.1884
+- tuned threshold improves F1 from 0.2037 to 0.2795
+- tuned threshold remains above the recall floor at 0.5407
+
+Candidate comparison from artifacts:
+
+- logistic_regression: val PR-AUC 0.2059, val F1@opt-threshold 0.2651 (selected)
+- random_forest: val PR-AUC 0.2097, val F1@opt-threshold 0.2606
+
+## 3.2 Current Issues and Risks (Living List)
+
+This section is the single source of truth for current model and product issues.
+
+1. Class imbalance remains severe
+- issue: positive readmission rate is about 11.16%.
+- impact: false positives rise quickly when recall is increased.
+- evidence: `artifacts/model_metadata.yaml` and `data/processed/data_quality_report.csv`.
+
+2. High missingness in key lab predictors
+- issue: `A1Cresult` missing ~83.3%, `max_glu_serum` missing ~94.7%.
+- impact: model often predicts without strong glycemic signal.
+- evidence: `data/processed/data_quality_report.csv`.
+
+3. Threshold tradeoff is unavoidable at current signal quality
+- issue: lower threshold improves F1 and recall but reduces precision versus stricter thresholds.
+- impact: operational burden from additional false alerts.
+- evidence: `artifacts/model_metadata.yaml` under `test_metrics` and `test_metrics_base_threshold`.
+
+4. Moderate ranking quality only
+- issue: PR-AUC is ~0.2168, better than prevalence baseline but still not strong.
+- impact: limited ceiling for precision at acceptable recall.
+- evidence: `artifacts/model_metadata.yaml`.
+
+5. External validity and deployment gap
+- issue: dataset is U.S.-origin public data with HK prevalence adjustment, not true local patient-level EHR.
+- impact: possible performance drift and calibration mismatch in real deployment.
+
+6. Responsible-AI and governance gaps still open
+- issue: no subgroup fairness dashboard, no calibration drift monitor, no production model monitoring loop.
+- impact: harder to defend safety and governance quality in real settings.
+
+## 3.3 Future Improvements and Roadmap (Living List)
+
+This section is the single source of truth for planned improvements.
+
+Immediate (next iteration)
+
+1. Precision-focused operating point pack
+- run controlled threshold profiles (high-precision, balanced, high-recall) and publish a table for stakeholder choice.
+2. Missingness-aware feature upgrades
+- add explicit missingness indicator features for high-missing clinical fields.
+3. Probability reliability reporting
+- generate reliability bins and expected calibration error in artifacts.
+
+Short-term
+
+1. Better class-imbalance handling
+- test focal-loss-style approximations or cost-sensitive tuning via sample weighting and class-specific thresholds.
+2. Feature engineering refresh
+- add interaction terms and temporal-utilization proxies from available visit history fields.
+3. Better model search coverage
+- include calibrated gradient boosting variants when runtime allows.
+
+Medium-term
+
+1. Subgroup fairness diagnostics
+- evaluate precision/recall/FPR by age bands, sex, and race categories in validation artifacts.
+2. Drift and monitoring scaffolding
+- add data drift checks and score distribution monitoring across runs.
+3. Error-analysis notebook
+- identify top false-positive and false-negative cohorts with actionable feature patterns.
+
+Long-term
+
+1. Local data alignment
+- map to HK-specific coding and clinical workflows, then retrain with local governance approval.
+2. Productionization
+- move from script pipeline to scheduled jobs + API service with model registry.
+3. Access control and audit hardening
+- role-based access for dashboard actions and signed audit events.
 
 ## 4. Full Workflow (Run Order)
 
@@ -76,7 +218,7 @@ Detailed map:
 9. [config/project_config.yaml](config/project_config.yaml)
 10. [config/hk_health_stats.csv](config/hk_health_stats.csv)
 
-## 6. Code Explanation and Possible Improvements (Per File)
+## 6. Code Explanation and Upgrades (Per File)
 
 ### 6.1 [src/data/download_datasets.py](src/data/download_datasets.py)
 

@@ -98,7 +98,7 @@ def seed_patients(db_path: str) -> None:
     ]
 
     for patient in demo_patients:
-        upsert_patient(db_path, patient)
+        upsert_patient(db_path, patient, actor="seed_demo")
 
     print(f"Seeded {len(demo_patients)} demo patients into {db_path}")
 
