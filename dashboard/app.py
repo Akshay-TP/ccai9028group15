@@ -525,20 +525,41 @@ with tab_registry:
 
 with tab_scoring:
     st.subheader("Run Model Scoring")
-    if patients_df.empty:
-        st.info("No patients available. Add records in the Patient Registry tab first.")
-    elif not (pd.io.common.file_exists(model_path) and pd.io.common.file_exists(metadata_path)):
-        st.error("Model artifact missing. Run training pipeline first.")
-    else:
-        scoring_scope = st.radio(
-            "Scoring Scope",
-            options=["Filtered Cohort", "All Patients"],
-            horizontal=True,
-            index=0,
-        )
-        scope_df = filtered_patients if scoring_scope == "Filtered Cohort" else patients_df
+    model_ready = pd.io.common.file_exists(model_path) and pd.io.common.file_exists(metadata_path)
+    has_patients = not patients_df.empty
 
-        if st.button("Score Selected Patients", type="primary", disabled=scope_df.empty):
+    scoring_scope = st.radio(
+        "Scoring Scope",
+        options=["Filtered Cohort", "All Patients"],
+        horizontal=True,
+        index=0,
+        disabled=not has_patients,
+    )
+    scope_df = filtered_patients if scoring_scope == "Filtered Cohort" else patients_df
+
+    if not has_patients:
+        st.info("No patients available. Add records in the Patient Registry tab first.")
+    elif scope_df.empty:
+        st.warning("No patients match the current filter. Adjust filters or switch to All Patients.")
+
+    if not model_ready:
+        st.error("Model artifact missing. Run training pipeline first.")
+
+    can_score = has_patients and model_ready and not scope_df.empty
+
+    score_clicked = st.button(
+        "Score Selected Patients",
+        type="primary",
+        help="Run AI prediction for the selected cohort.",
+    )
+    if score_clicked:
+        if not has_patients:
+            st.error("Add patients in the Patient Registry tab first.")
+        elif not model_ready:
+            st.error("Model artifact missing. Run training pipeline first.")
+        elif scope_df.empty:
+            st.warning("Current scoring scope has no patients. Adjust filters or switch to All Patients.")
+        else:
             feature_df = scope_df.drop(columns=[col for col in ["patient_id", "created_at", "updated_at"] if col in scope_df])
             scored, scoring_mode = score_patients(feature_df, model_path=model_path, metadata_path=metadata_path)
             scored.insert(0, "patient_id", scope_df["patient_id"].tolist())
@@ -547,73 +568,73 @@ with tab_scoring:
             st.session_state["scoring_mode"] = scoring_mode
             st.session_state["scoring_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        scored_df: pd.DataFrame | None = st.session_state.get("scored_df")
-        if scored_df is not None and not scored_df.empty:
-            st.caption(
-                f"Last scoring run: {st.session_state.get('scoring_time', 'n/a')} "
-                f"({st.session_state.get('scoring_mode', 'trained_model')})"
+    scored_df: pd.DataFrame | None = st.session_state.get("scored_df")
+    if scored_df is not None and not scored_df.empty:
+        st.caption(
+            f"Last scoring run: {st.session_state.get('scoring_time', 'n/a')} "
+            f"({st.session_state.get('scoring_mode', 'trained_model')})"
+        )
+        k1, k2, k3 = st.columns(3)
+        if "risk_band" not in scored_df.columns:
+            scored_df["risk_band"] = scored_df["risk_label"]
+        high_count = int((scored_df["risk_band"] == "HIGH").sum())
+        medium_count = int((scored_df["risk_band"] == "MEDIUM").sum())
+        high_share = (high_count / len(scored_df)) * 100
+        medium_share = (medium_count / len(scored_df)) * 100
+        avg_risk = float(scored_df["calibrated_probability"].mean())
+        k1.metric("High-Risk Patients", f"{high_count}")
+        k2.metric("High + Medium Share", f"{(high_share + medium_share):.1f}%")
+        k3.metric("Average Calibrated Risk", f"{avg_risk:.3f}")
+
+        st.dataframe(
+            scored_df[
+                [
+                    "patient_id",
+                    "calibrated_probability",
+                    "risk_band",
+                    "risk_label",
+                    "recommended_action",
+                ]
+            ],
+            width="stretch",
+            height=260,
+        )
+
+        chart_a, chart_b = st.columns(2)
+        with chart_a:
+            hist = px.histogram(
+                scored_df,
+                x="calibrated_probability",
+                color="risk_band",
+                nbins=20,
+                title="Calibrated 30-Day Risk Distribution",
+                color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
             )
-            k1, k2, k3 = st.columns(3)
-            if "risk_band" not in scored_df.columns:
-                scored_df["risk_band"] = scored_df["risk_label"]
-            high_count = int((scored_df["risk_band"] == "HIGH").sum())
-            medium_count = int((scored_df["risk_band"] == "MEDIUM").sum())
-            high_share = (high_count / len(scored_df)) * 100
-            medium_share = (medium_count / len(scored_df)) * 100
-            avg_risk = float(scored_df["calibrated_probability"].mean())
-            k1.metric("High-Risk Patients", f"{high_count}")
-            k2.metric("High + Medium Share", f"{(high_share + medium_share):.1f}%")
-            k3.metric("Average Calibrated Risk", f"{avg_risk:.3f}")
+            st.plotly_chart(hist, width="stretch")
 
-            st.dataframe(
-                scored_df[
-                    [
-                        "patient_id",
-                        "calibrated_probability",
-                        "risk_band",
-                        "risk_label",
-                        "recommended_action",
-                    ]
-                ],
-                width="stretch",
-                height=260,
+        with chart_b:
+            risk_mix = (
+                scored_df.groupby("risk_band", as_index=False)["patient_id"].count().rename(columns={"patient_id": "count"})
             )
-
-            chart_a, chart_b = st.columns(2)
-            with chart_a:
-                hist = px.histogram(
-                    scored_df,
-                    x="calibrated_probability",
-                    color="risk_band",
-                    nbins=20,
-                    title="Calibrated 30-Day Risk Distribution",
-                    color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
-                )
-                st.plotly_chart(hist, width="stretch")
-
-            with chart_b:
-                risk_mix = (
-                    scored_df.groupby("risk_band", as_index=False)["patient_id"].count().rename(columns={"patient_id": "count"})
-                )
-                bar = px.bar(
-                    risk_mix,
-                    x="risk_band",
-                    y="count",
-                    color="risk_band",
-                    title="Risk Band Mix",
-                    color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
-                )
-                st.plotly_chart(bar, width="stretch")
-
-            download_name = f"scored_patients_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-            st.download_button(
-                "Download Scored Cohort CSV",
-                data=to_csv_bytes(scored_df),
-                file_name=download_name,
-                mime="text/csv",
+            bar = px.bar(
+                risk_mix,
+                x="risk_band",
+                y="count",
+                color="risk_band",
+                title="Risk Band Mix",
+                color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
             )
-        else:
-            st.info("Run scoring to generate risk analytics and intervention recommendations.")
+            st.plotly_chart(bar, width="stretch")
+
+        download_name = f"scored_patients_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        st.download_button(
+            "Download Scored Cohort CSV",
+            data=to_csv_bytes(scored_df),
+            file_name=download_name,
+            mime="text/csv",
+        )
+    elif can_score:
+        st.info("Run scoring to generate risk analytics and intervention recommendations.")
 
 with tab_audit:
     st.subheader("Patient Registry Audit Events")
