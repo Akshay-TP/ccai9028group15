@@ -275,19 +275,19 @@ st.markdown(
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600&display=swap');
 
     :root {
-        --bg-1: #f5f9fb;
-        --bg-2: #eaf2f7;
-        --accent: #007a83;
-        --accent-2: #f4a259;
-        --alert: #d62839;
+        --bg-1: #eef4f8;
+        --bg-2: #dfeaf2;
+        --accent: #005a9c;
+        --accent-2: #9a5d00;
+        --alert: #b00020;
         --card: #ffffff;
-        --text: #0d1b2a;
-        --muted: #52677d;
+        --text: #0a1220;
+        --muted: #2f455b;
     }
 
     .stApp {
         font-family: 'Manrope', sans-serif;
-        background: radial-gradient(circle at 15% -5%, #cfe8f2, var(--bg-1) 58%);
+        background: radial-gradient(circle at 15% -5%, #c5dff0, var(--bg-1) 58%);
         color: var(--text);
     }
 
@@ -310,24 +310,24 @@ st.markdown(
 
     .metric-tile {
         border-radius: 16px;
-        border: 1px solid rgba(0, 122, 131, 0.25);
+        border: 1px solid rgba(0, 90, 156, 0.45);
         background: var(--card);
         padding: 16px;
-        box-shadow: 0 10px 24px rgba(21, 40, 57, 0.08);
+        box-shadow: 0 8px 20px rgba(10, 18, 32, 0.14);
     }
 
     .title-banner {
         background: linear-gradient(110deg, var(--accent), var(--accent-2));
-        color: #f8fbfd;
+        color: #ffffff;
         border-radius: 18px;
         padding: 20px;
         margin-bottom: 14px;
         animation: fadeIn 0.8s ease-out;
-        box-shadow: 0 14px 30px rgba(0, 122, 131, 0.25);
+        box-shadow: 0 14px 30px rgba(10, 18, 32, 0.28);
     }
 
     .title-banner h2, .title-banner p {
-        color: #f8fbfd !important;
+        color: #ffffff !important;
     }
 
     @keyframes fadeIn {
@@ -587,7 +587,7 @@ with tab_scoring:
                     color="risk_band",
                     nbins=20,
                     title="Calibrated 30-Day Risk Distribution",
-                    color_discrete_map={"HIGH": "#d62839", "MEDIUM": "#f4a259", "LOW": "#007a83"},
+                    color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
                 )
                 st.plotly_chart(hist, width="stretch")
 
@@ -601,7 +601,7 @@ with tab_scoring:
                     y="count",
                     color="risk_band",
                     title="Risk Band Mix",
-                    color_discrete_map={"HIGH": "#d62839", "MEDIUM": "#f4a259", "LOW": "#007a83"},
+                    color_discrete_map={"HIGH": "#b00020", "MEDIUM": "#9a5d00", "LOW": "#005a9c"},
                 )
                 st.plotly_chart(bar, width="stretch")
 
@@ -653,7 +653,7 @@ with tab_model:
             y="feature",
             orientation="h",
             title="Model Feature Importance Share",
-            color_discrete_sequence=["#007a83"],
+            color_discrete_sequence=["#005a9c"],
         )
         st.plotly_chart(chart, width="stretch")
         st.dataframe(top_importance, width="stretch")
